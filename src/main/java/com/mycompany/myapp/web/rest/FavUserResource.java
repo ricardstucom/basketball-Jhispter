@@ -3,7 +3,9 @@ package com.mycompany.myapp.web.rest;
 import com.codahale.metrics.annotation.Timed;
 import com.mycompany.myapp.domain.FavUser;
 
+import com.mycompany.myapp.domain.Player;
 import com.mycompany.myapp.repository.FavUserRepository;
+import com.mycompany.myapp.service.dto.PlayerDTO;
 import com.mycompany.myapp.web.rest.util.HeaderUtil;
 
 import org.slf4j.Logger;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.inject.Inject;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,7 +30,7 @@ import java.util.Optional;
 public class FavUserResource {
 
     private final Logger log = LoggerFactory.getLogger(FavUserResource.class);
-        
+
     @Inject
     private FavUserRepository favUserRepository;
 
@@ -118,4 +121,56 @@ public class FavUserResource {
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert("favUser", id.toString())).build();
     }
 
+
+
+    /* ------------------------------------------------*/
+    @GetMapping("/top-players")
+
+    @Timed
+
+    public ResponseEntity<List<PlayerDTO>> getTopPlayers()
+
+        throws URISyntaxException {
+
+
+
+        log.debug("REST request to get TopPlayers");
+
+
+
+        List<Object[]> topPlayers = favUserRepository.findTopPlayers();
+
+
+
+        List<PlayerDTO> result = new ArrayList<>();
+
+
+
+        topPlayers.forEach(
+
+            topPlayer -> {
+
+                PlayerDTO p = new PlayerDTO();
+
+                p.setPlayer((Player) topPlayer[0]);
+
+                p.setNumFavs((Long) topPlayer[1]);
+
+
+
+                result.add(p);
+
+            }
+
+
+
+        );
+
+
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+
+    }
+
+    /* ------------------------------------ */
 }
