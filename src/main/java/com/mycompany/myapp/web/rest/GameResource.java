@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.mycompany.myapp.domain.Game;
 
 import com.mycompany.myapp.repository.GameRepository;
+import com.mycompany.myapp.service.dto.GameDTO;
 import com.mycompany.myapp.web.rest.util.HeaderUtil;
 
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ import java.util.Optional;
 public class GameResource {
 
     private final Logger log = LoggerFactory.getLogger(GameResource.class);
-        
+
     @Inject
     private GameRepository gameRepository;
 
@@ -116,6 +117,18 @@ public class GameResource {
         log.debug("REST request to delete Game : {}", id);
         gameRepository.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert("game", id.toString())).build();
+    }
+    @GetMapping("/avgRatingByGame/{id}")
+    public ResponseEntity<GameDTO> avgRatingByGame(@PathVariable Long id) {
+        log.debug("REST request to get avgRatingByGame : {}", id);
+
+        Game game = gameRepository.findOne(id);
+
+        Double avg= gameRatingRepository.avgGameRating(game);
+
+        GameDTO gameDTO = new GameDTO(game, avg);
+
+        return new ResponseEntity<GameDTO>(gameDTO, HttpStatus.OK);
     }
 
 }

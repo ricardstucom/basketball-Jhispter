@@ -10,7 +10,8 @@ import com.mycompany.myapp.web.rest.util.HeaderUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -154,7 +155,7 @@ public class FavUserResource {
 
                 p.setPlayer((Player) topPlayer[0]);
 
-                p.setNumFavs((Long) topPlayer[1]);
+                p.setCount((Long) topPlayer[1]);
 
 
 
@@ -173,4 +174,33 @@ public class FavUserResource {
     }
 
     /* ------------------------------------ */
+
+
+
+
+    @GetMapping("/top-five-players")
+    @Timed
+    public ResponseEntity<List<PlayerDTO>> getFiveTopPlayers()
+        throws URISyntaxException {
+
+        log.debug("REST request to get TopPlayers");
+
+        Pageable pageable = new PageRequest(0, 5);
+
+        List<Object[]> topPlayers = favUserRepository.findFiveFavoritePlayers(pageable);
+
+        List<PlayerDTO> result = new ArrayList<>();
+
+        topPlayers.forEach(
+            topPlayer -> {
+                PlayerDTO p = new PlayerDTO();
+                p.setPlayer((Player) topPlayer[0]);
+                p.setCount((Long) topPlayer[1]);
+
+                result.add(p);
+            }
+
+        );
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 }

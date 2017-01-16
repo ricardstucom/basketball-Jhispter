@@ -8,7 +8,7 @@ import com.mycompany.myapp.domain.Player;
 public class PlayerDTO {
 
     private Player player;
-    private Long numFavs;
+    private Long count;
 
     public PlayerDTO() {
 
@@ -16,11 +16,11 @@ public class PlayerDTO {
 
 
 
-    public PlayerDTO(Player player, Long numFavs) {
+    public PlayerDTO(Player player, Long count) {
 
         this.player = player;
 
-        this.numFavs = numFavs;
+        this.count = count;
 
     }
 
@@ -42,17 +42,17 @@ public class PlayerDTO {
 
 
 
-    public Long getNumFavs() {
+    public Long getCount() {
 
-        return numFavs;
+        return count;
 
     }
 
 
 
-    public void setNumFavs(Long numFavs) {
+    public void setCount(Long count) {
 
-        this.numFavs = numFavs;
+        this.count = count;
 
     }
 
@@ -74,7 +74,7 @@ public class PlayerDTO {
 
         if (player != null ? !player.equals(playerDTO.player) : playerDTO.player != null) return false;
 
-        return numFavs != null ? numFavs.equals(playerDTO.numFavs) : playerDTO.numFavs == null;
+        return count != null ? count.equals(playerDTO.count) : playerDTO.count == null;
 
     }
 
@@ -86,7 +86,7 @@ public class PlayerDTO {
 
         int result = player != null ? player.hashCode() : 0;
 
-        result = 31 * result + (numFavs != null ? numFavs.hashCode() : 0);
+        result = 31 * result + (count != null ? count.hashCode() : 0);
 
         return result;
 
@@ -102,9 +102,12 @@ public class PlayerDTO {
 
             "player=" + player +
 
-            ", numFavs=" + numFavs +
+            ", count=" + count +
 
             '}';
 
     }
+
+
+
 }
