@@ -37,6 +37,7 @@ public final class HeaderUtil {
         log.error("Entity creation failed, {}", defaultMessage);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-basketballApp-error", "error." + errorKey);
+        headers.add("x-basketballApp-message","El partido no existe");
         headers.add("X-basketballApp-params", entityName);
         return headers;
     }

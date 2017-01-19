@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.springframework.http.ResponseEntity.badRequest;
+
 /**
  * REST controller for managing GameUser.
  */
@@ -50,7 +52,7 @@ public class GameUserResource {
     public ResponseEntity<GameUser> createGameUser(@RequestBody GameUser gameUser) throws URISyntaxException {
         log.debug("REST request to save GameUser : {}", gameUser);
         if (gameUser.getId() != null) {
-            return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("gameUser", "idexists", "A new gameUser cannot already have an ID")).body(null);
+            return badRequest().headers(HeaderUtil.createFailureAlert("gameUser", "idexists", "A new gameUser cannot already have an ID")).body(null);
         }
         GameUser result = gameUserRepository.save(gameUser);
         return ResponseEntity.created(new URI("/api/game-users/" + result.getId()))
@@ -128,12 +130,27 @@ public class GameUserResource {
     public ResponseEntity<GameDTO> avgGame(Long idGame)throws URISyntaxException{
 
         Game game = gameRepository.findOne(idGame);
-        Double avg = gameUserRepository.gameAvg(game);
 
-        GameDTO gameDTO = new GameDTO(game,avg);
+        if(game==null){
 
-        return new ResponseEntity<>(gameDTO, HttpStatus.OK);
+
+           return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("gameUserRepository","gameNotExists","El partido no existe")).body(null);
+
+
+        }else {
+
+
+            Double avg = gameUserRepository.gameAvg(game);
+
+            GameDTO gameDTO = new GameDTO(game, avg);
+
+
+            return new ResponseEntity<>(gameDTO, HttpStatus.OK);
+        }
     }
+
+
+
     @GetMapping("/fiveGames")
     public ResponseEntity<List<GameDTO>> fiveGames()throws URISyntaxException{
 
