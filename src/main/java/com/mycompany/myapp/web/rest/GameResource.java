@@ -4,11 +4,14 @@ import com.codahale.metrics.annotation.Timed;
 import com.mycompany.myapp.domain.Game;
 
 import com.mycompany.myapp.repository.GameRepository;
+import com.mycompany.myapp.repository.GameUserRepository;
 import com.mycompany.myapp.service.dto.GameDTO;
 import com.mycompany.myapp.web.rest.util.HeaderUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +34,9 @@ public class GameResource {
 
     @Inject
     private GameRepository gameRepository;
+
+    @Inject
+    private GameUserRepository gameUserRepository;
 
     /**
      * POST  /games : Create a new game.
@@ -117,18 +123,6 @@ public class GameResource {
         log.debug("REST request to delete Game : {}", id);
         gameRepository.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert("game", id.toString())).build();
-    }
-    @GetMapping("/avgRatingByGame/{id}")
-    public ResponseEntity<GameDTO> avgRatingByGame(@PathVariable Long id) {
-        log.debug("REST request to get avgRatingByGame : {}", id);
-
-        Game game = gameRepository.findOne(id);
-
-        Double avg= gameRatingRepository.avgGameRating(game);
-
-        GameDTO gameDTO = new GameDTO(game, avg);
-
-        return new ResponseEntity<GameDTO>(gameDTO, HttpStatus.OK);
     }
 
 }
