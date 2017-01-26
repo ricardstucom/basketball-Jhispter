@@ -38,6 +38,7 @@ public final class HeaderUtil {
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-basketballApp-error", "error." + errorKey);
         headers.add("x-basketballApp-message","El partido no existe");
+        headers.add("x-basketballApp-message","Has modificado la valoracion del partido");
         headers.add("X-basketballApp-params", entityName);
         return headers;
     }

@@ -6,6 +6,9 @@ import com.mycompany.myapp.domain.GameUser;
 
 import com.mycompany.myapp.repository.GameRepository;
 import com.mycompany.myapp.repository.GameUserRepository;
+import com.mycompany.myapp.repository.UserRepository;
+import com.mycompany.myapp.security.SecurityUtils;
+import com.mycompany.myapp.service.GameService;
 import com.mycompany.myapp.service.dto.GameDTO;
 import com.mycompany.myapp.web.rest.util.HeaderUtil;
 
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.inject.Inject;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +44,11 @@ public class GameUserResource {
     private GameUserRepository gameUserRepository;
     @Inject
     private GameRepository gameRepository;
+    @Inject
+    private UserRepository userRepository;
+
+    @Inject
+    private GameService gameService;
     /**
      * POST  /game-users : Create a new gameUser.
      *
@@ -52,9 +61,34 @@ public class GameUserResource {
     public ResponseEntity<GameUser> createGameUser(@RequestBody GameUser gameUser) throws URISyntaxException {
         log.debug("REST request to save GameUser : {}", gameUser);
         if (gameUser.getId() != null) {
-            return badRequest().headers(HeaderUtil.createFailureAlert("gameUser", "idexists", "A new gameUser cannot already have an ID")).body(null);
+            return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("gameUser", "idexists", "A new gameUser cannot already have an ID")).body(null);
         }
-        GameUser result = gameUserRepository.save(gameUser);
+
+        if(gameService.findOne(gameUser.getGame().getId()) == null){
+            return ResponseEntity.badRequest().
+                headers(HeaderUtil.
+                    createFailureAlert("gameUser","gamenotexists","Game not Exists")).body(null);
+
+        }
+
+
+        gameUser.setUser(userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin()).get());
+        gameUser.setTime(ZonedDateTime.now());
+
+        Optional<GameUser> gameUserOptional = gameUserRepository.
+            findByUserAndGame(gameUser.getUser(),gameUser.getGame());
+
+        GameUser result = null;
+
+        if (gameUserOptional.isPresent()){
+            result = gameUserOptional.get();
+            result.setPoints(gameUser.getPoints());
+            result.setTime(gameUser.getTime());
+            result = gameUserRepository.save(result);
+        } else{
+            result = gameUserRepository.save(gameUser);
+        }
+
         return ResponseEntity.created(new URI("/api/game-users/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert("gameUser", result.getId().toString()))
             .body(result);
@@ -138,14 +172,23 @@ public class GameUserResource {
 
 
         }else {
+//            GameUser f = gameUserRepository.findOne(idGame);
+//                    if(f!=null&&f.getUser().equals( userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin())) ){
+//                        Double avg = gameUserRepository.gameAvg(game);
+//
+//                        GameDTO gameDTO = new GameDTO(game, avg);
+//
+//
+//                        return new ResponseEntity<>(gameDTO, HttpStatus.OK);
+//                    }
+
+                        Double avg = gameUserRepository.gameAvg(game);
+
+                        GameDTO gameDTO = new GameDTO(game, avg);
 
 
-            Double avg = gameUserRepository.gameAvg(game);
+                        return new ResponseEntity<>(gameDTO, HttpStatus.OK);
 
-            GameDTO gameDTO = new GameDTO(game, avg);
-
-
-            return new ResponseEntity<>(gameDTO, HttpStatus.OK);
         }
     }
 
